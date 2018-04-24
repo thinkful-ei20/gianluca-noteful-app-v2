@@ -40,9 +40,7 @@ router.get('/notes/:id', (req, res, next) => {
 		.then(results => {
 			res.json(results[0]);
 		})
-		.catch(err => {
-			next(err);
-		});
+		.catch(err => next(err));
 });
 
 // Put update an item
@@ -74,9 +72,7 @@ router.put('/notes/:id', (req, res, next) => {
 		.then(results => {
 			res.json(results[0]);
 		})
-		.catch(err => {
-			next(err);
-		});
+		.catch(err => next(err));
 });
 
 // Post (insert) an item
@@ -97,11 +93,9 @@ router.post('/notes', (req, res, next) => {
 		.into('notes')
 		.returning(['id', 'title', 'content', 'created'])
 		.then(results => {
-			res.json(results[0]);
+			res.status(201).json(results[0]);
 		})
-		.catch(err => {
-			console.log(err);
-		});
+		.catch(err => next(err));
 });
 
 // Delete an item
@@ -112,12 +106,10 @@ router.delete('/notes/:id', (req, res, next) => {
 		.del()
 		.from('notes')
 		.where('id',`${id}`)
-		.then(results => {
+		.then(() => {
 			res.sendStatus(204);
 		})
-		.catch(err => {
-			next(err);
-		});
+		.catch(err => next(err));
 });
 
 module.exports = router;
