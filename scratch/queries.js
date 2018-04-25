@@ -1,9 +1,9 @@
 
-
 const knex = require('../knex');
 
 // Get All Notes accepts a searchTerm and finds notes with titles which contain the term. It returns an array of objects.
-// let searchTerm = 'gaga';
+
+let searchTerm = 'gaga';
 knex
 	.select('notes.id', 'title', 'content')
 	.from('notes')
@@ -23,7 +23,8 @@ knex
 
 
 // Get Note By Id accepts an ID. It returns the note as an object not an array
-// let id = '1000';
+
+let id = '1000';
 knex
 	.select()
 	.from('notes')

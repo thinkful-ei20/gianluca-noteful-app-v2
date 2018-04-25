@@ -5,11 +5,7 @@ const express = require('express');
 // Create an router instance (aka "mini-app")
 const router = express.Router();
 
-// TEMP: Simple In-Memory Database
-// const data = require('../db/notes');
-// const simDB = require('../db/simDB');
-// const notes = simDB.initialize(data);
-
+// knex SQL library, already set with our knexfile.js "configuration"
 const knex = require('../knex');
 
 // Get All (and search by query)
@@ -24,7 +20,11 @@ router.get('/notes', (req, res, next) => {
 		})
 		.orderBy('notes.id')
 		.then(results => {
-			res.json(results);
+			if(results) {
+				res.json(results);
+			} else {
+				next();
+			}
 		})
 		.catch(err => next(err));
 });
@@ -38,7 +38,11 @@ router.get('/notes/:id', (req, res, next) => {
 		.from('notes')
 		.where('id', `${id}`)
 		.then(results => {
-			res.json(results[0]);
+			if(results.length > 0) {
+				res.json(results[0]);
+			} else {
+				next();
+			}
 		})
 		.catch(err => next(err));
 });
@@ -70,7 +74,11 @@ router.put('/notes/:id', (req, res, next) => {
 		.where('id',`${id}`)
 		.returning(['id','title','content','created'])
 		.then(results => {
-			res.json(results[0]);
+			if(results.length > 0) {
+				res.json(results[0]);
+			} else {
+				next();
+			}
 		})
 		.catch(err => next(err));
 });
@@ -79,21 +87,23 @@ router.put('/notes/:id', (req, res, next) => {
 router.post('/notes', (req, res, next) => {
 	const { title, content } = req.body;
 
-	const newItem = { title, content };
 	/***** Never trust users - validate input *****/
-	if (!newItem.title) {
+	if (!title) {
 		const err = new Error('Missing `title` in request body');
 		err.status = 400;
 		return next(err);
 	}
 
-
 	knex
-		.insert([newItem])
+		.insert({title, content})
 		.into('notes')
 		.returning(['id', 'title', 'content', 'created'])
 		.then(results => {
-			res.status(201).json(results[0]);
+			if(results.length > 0)
+				res.status(201).json(results[0]);
+			else {
+				next();
+			}
 		})
 		.catch(err => next(err));
 });
@@ -106,8 +116,12 @@ router.delete('/notes/:id', (req, res, next) => {
 		.del()
 		.from('notes')
 		.where('id',`${id}`)
-		.then(() => {
-			res.sendStatus(204);
+		.then(result => {
+			if(result >= 1) {
+				res.sendStatus(204);
+			} else {
+				next();
+			}
 		})
 		.catch(err => next(err));
 });
