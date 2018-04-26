@@ -9,12 +9,19 @@ const knex = require('../knex');
 
 // Get All (and search by query)
 router.get('/notes', (req, res, next) => {
-	const searchTerm = req.query.searchTerm;
+	const {searchTerm, folderId} = req.query;
 
-	knex.select('notes.id', 'title', 'content').from('notes')
+	knex('notes')
+		.select('notes.id', 'title', 'content', 'folders.id as folder_id', 'folders.name as folderName')
+		.leftJoin('folders', 'notes.folder_id', 'folders.id')
 		.modify(function (queryBuilder) {
 			if (searchTerm) {
 				queryBuilder.where('title', 'like', `%${searchTerm}%`);
+			}
+		})
+		.modify(function(queryBuilder) {
+			if(folderId) {
+				queryBuilder.where('folder_id', folderId);
 			}
 		})
 		.orderBy('notes.id')
@@ -30,12 +37,13 @@ router.get('/notes', (req, res, next) => {
 
 // Get a single item
 router.get('/notes/:id', (req, res, next) => {
+
 	const id = req.params.id;
 
-	knex
-		.select()
-		.from('notes')
-		.where('id', `${id}`)
+	knex('notes')
+		.select('notes.id', 'title', 'content', 'folders.id as folder_id', 'folders.name as folderName')
+		.leftJoin('folders', 'notes.folder_id', 'folders.id')
+		.where('notes.id', id) /* ambiguity with id, so used 'notes.id' */
 		.then(results => {
 			if(results.length > 0) {
 				res.json(results[0]);
@@ -67,11 +75,18 @@ router.put('/notes/:id', (req, res, next) => {
 		return next(err);
 	}
 
-	knex
-		.update(updateObj)
-		.from('notes')
-		.where('id',`${id}`)
-		.returning(['id','title','content','created'])
+	let noteId;
+
+	knex('notes')
+		.update(updateObj, 'id')
+		.where('id',id)
+		.then(([id]) => {
+			noteId = id;
+			return knex('notes')
+				.select('notes.id', 'title', 'content', 'folder_id', 'folders.name as folder_name')
+				.leftJoin('folders', 'notes.folder_id', 'folders.id')
+				.where('notes.id', noteId);
+		})
 		.then(results => {
 			if(results.length > 0) {
 				res.json(results[0]);
@@ -84,7 +99,7 @@ router.put('/notes/:id', (req, res, next) => {
 
 // Post (insert) an item
 router.post('/notes', (req, res, next) => {
-	const { title, content } = req.body;
+	const { title, content, folder_id } = req.body;
 
 	/***** Never trust users - validate input *****/
 	if (!title) {
@@ -93,13 +108,28 @@ router.post('/notes', (req, res, next) => {
 		return next(err);
 	}
 
-	knex
-		.insert({title, content})
-		.into('notes')
-		.returning(['id', 'title', 'content', 'created'])
+	const newItem = {
+		title: title,
+		content: content,
+		folder_id: folder_id  // Add `folder_id`
+	};
+
+	let noteId;
+
+	knex('notes')
+		.insert(newItem,'id')
+		.then(([id]) => {
+
+			noteId = id;
+
+			return knex.select('notes.id', 'title', 'content', 'folder_id', 'folders.name as folder_name')
+				.from('notes')
+				.leftJoin('folders', 'notes.folder_id', 'folders.id')
+				.where('notes.id', noteId);
+		})
 		.then(results => {
 			if(results.length > 0)
-				res.status(201).json(results[0]);
+				res.location(`${req.originalUrl}/${results[0].id}`).status(201).json(results[0]);
 			else {
 				next();
 			}
