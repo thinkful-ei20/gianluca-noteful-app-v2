@@ -104,4 +104,4 @@ INSERT INTO notes_tags (note_id, tag_id)
 VALUES
 	(1000,1),
 	(1001,2),
-	(1002,1);
+	(1001,1);
