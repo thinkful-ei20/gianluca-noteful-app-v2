@@ -5,11 +5,11 @@ const knex = require('../knex');
 
 router.get('/tags', (req,res,next) => {
 	knex.select('id', 'name')
-	.from('tags')
-	.then(results => {
-		res.json(results);
-	})
-	.catch(err => next(err));
+		.from('tags')
+		.then(results => {
+			res.json(results);
+		})
+		.catch(err => next(err));
 });
 
 router.get('/tags/:id', (req,res,next) => {
@@ -20,7 +20,7 @@ router.get('/tags/:id', (req,res,next) => {
 		.then(result => {
 			if(result){
 				res.json(result);
-			}	
+			}
 			next();
 		})
 		.catch(err => next(err));
@@ -44,13 +44,13 @@ router.post('/tags',(req,res,next) => {
 		.then(result => {
 			if(!result) {
 				return knex
-				.insert({name},['id','name'])
-				.into('tags')
-			} else {
-				const err = new Error('Cannot use duplicate `tag` : `name` in request body');
-				err.status = 409;
-				return next(err);
+					.insert({name},['id','name'])
+					.into('tags');
 			}
+			const err = new Error('Cannot use duplicate `tag` : `name` in request body');
+			err.status = 409;
+			return next(err);
+
 		})
 		.then((results) => {
 			// Uses Array index solution to get first item in results array
@@ -79,13 +79,13 @@ router.put('/tags/:id', (req,res,next) => {
 		.then(result => {
 			if(!result) {
 				return knex('tags')
-				.update(updateObj, ['id', 'name'])
-				.where('id', id);
-			} else {
-				const err = new Error('Cannot use duplicate `tag` : `name` in request body');
-				err.status = 409;
-				return next(err);
+					.update(updateObj, ['id', 'name'])
+					.where('id', id);
 			}
+			const err = new Error('Cannot use duplicate `tag` : `name` in request body');
+			err.status = 409;
+			return next(err);
+
 		})
 		.then(results => {
 			if(results.length > 0) {

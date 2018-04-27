@@ -61,7 +61,7 @@ typings/
 .next
 
 # scratch
-scratch/
+scratch/queries.js
 
 # .vscode
 .vscode
