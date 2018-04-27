@@ -1,2 +1,9 @@
 language: node_js
 node_js: node
+deploy:
+  provider: heroku
+  api_key:
+    secure: OzSrMq5imo4amby9J19N+Zf9qscfauOTrS3kClBg0XcGwkgA3CmFxADK03m0aV0/MLIXzUBvAmq57Ysl+wvUeTW1XrqzPJOZSqd9ltKbjLDT6kM3ntPiy3AeNUHGQUFQYSJRWD+kvPVKzzvGwLaVW2crq+lHNg2A9vSyQDjtebgeFr+nTDwJEGZtJunQHRvZz6tVEio+iz3/QA62x1Vo4TlbIcLqsCC5Y/wVmDtEi0p+rIETZ9sIUQVVCeTSSSqf4ddQvQvzb4OLcwe6nvOQ3tOK5093G8xs5gyX5hflefqQ8oGNX7gJ5ynfQP/NGyJ7t+4kvgU7X+5QqgCJXEouF0NRlR+6K+tGJWBmVcRgUuySMFJMRpjYTIRAXsBmF93vVPHv7JgBrnT8ZTD2OjInkimrF7dJ5OmNke4J8IH7QZyhLLGntqi7LM3Cv0q2Lkqc7R4Ht4FOGapeE4lg3dt3zvTZDdunLiTf4R7ctzof7bi05wKHFtsOqk9oXuKX527PKPS/MVveyQU1iCBcF4CzQ4PqS9lqz9a5WeZ/CUHNXukZovSTOzYlLpkkWQ99L/tKVI0OLu1G6Ge+lPhv4//zKpicvLgDjj+bcqMCkoMfzYolV0zJY1Y9Ihx4FGa8mIFP5T4+tufxeebG/fUeyGW4X+zb81hKX98tYghvZfx+6tY=
+  app: gianluca-noteful-app-v2
+  on:
+    repo: thinkful-ei20/gianluca-noteful-app-v2
