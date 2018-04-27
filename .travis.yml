@@ -1,12 +1,2 @@
 language: node_js
 node_js: node
-services: postgresql
-before_script:
-- psql -U postgres -c 'CREATE DATABASE "noteful-test";'
-deploy:
-  provider: heroku
-  api_key:
-    secure: NO0I+9jQ3qLPwOPfjpBSHehJU1fg2/BKzlfliqghzGqUngmt7NPA9c4jZdjETpZyXBjPGSLlCltGbZNw6vPHqTBpgEWSTEW7pzreOTPH6JkMugEj4Vk4mOpkZq4rTebNjAuklett/OCNYLrmLhLkw4ethA/gMO3lZZh4gxPiQIwa9cT3evhSe+rIJh9mVmNCNe67W0L/nOncYVReCEVdvsQvP+RITcrRH/ZZ++wvdmXESc+0rZVMzK5+dWr0L1sT8HvAbA0wvwW9vtPXkIrYqBO8E81mLkOyKRGxHyI/Z8N75g3BU4XLQLRWtlJMGe8tNtvP+fF1ZOIOdAnXg8MAuriozCRiyU8V74zZzgEU2QD7NmudF0uaPi1jlbgT3z/HHnIJdE3WgSJBP6623gSP7yayJhX/d8oc9Rjd9cDHA2eqId9jUofDURXnj0udDwNIPWpOQ0s21wbGJFMFjCM9b2dK1HcGcePoOliCDJ61iRbn0atW5XnfcX1lySXdHMzN/tfwmHJMwuqir3fDf8hNndbXQptP7knuZUWrFJLOuVomoOaIsWg7Ws9LHJ+RJISZv3IzUYwV88i0av/k4pAhTWDZd6OchI0agtPDQ/FJKUo8wyb0kaEQSJ+6ometWQ/oU0FD4asf5kUBKeAJZ8iWkOzd5VQ/r5v1L0UY9gA04DY=
-  app: gianluca-noteful-app-v2
-  on:
-    repo: thinkful-ei20/gianluca-noteful-app-v2
