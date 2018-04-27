@@ -13,9 +13,9 @@ router.get('/notes', (req, res, next) => {
 	const {searchTerm, folderId, tagId} = req.query;
 
 	knex('notes')
-		.select('notes.id', 'title', 'content', 
-		'folders.id as folder_id', 'folders.name as folderName', 
-		'tags.id as tagId','tags.name as tagName')
+		.select('notes.id', 'title', 'content',
+			'folders.id as folder_id', 'folders.name as folderName',
+			'tags.id as tagId','tags.name as tagName')
 		.leftJoin('folders', 'notes.folder_id', 'folders.id')
 		.leftJoin('notes_tags', 'notes_tags.note_id', 'notes.id')
 		.leftJoin('tags','notes_tags.tag_id', 'tags.id')
@@ -31,7 +31,7 @@ router.get('/notes', (req, res, next) => {
 		})
 		.modify(function (queryBuilder) {
 			if (tagId) {
-			  queryBuilder.where('tag_id', tagId);
+				queryBuilder.where('tag_id', tagId);
 			}
 		})
 		.orderBy('notes.id')
@@ -53,17 +53,17 @@ router.get('/notes/:id', (req, res, next) => {
 	const id = req.params.id;
 
 	knex('notes')
-		.select('notes.id', 'title', 'content', 
-		'folders.id as folder_id', 'folders.name as folderName', 
-		'tags.id as tagId','tags.name as tagName')
+		.select('notes.id', 'title', 'content',
+			'folders.id as folder_id', 'folders.name as folderName',
+			'tags.id as tagId','tags.name as tagName')
 		.leftJoin('folders', 'notes.folder_id', 'folders.id')
 		.leftJoin('notes_tags', 'notes_tags.note_id', 'notes.id')
 		.leftJoin('tags','notes_tags.tag_id', 'tags.id')
-		.where('notes.id', id) /* ambiguity with id, so used 'notes.id' */
+		.where('notes.id', id)
 		.then(results => {
 			if(results.length > 0) {
 				const hydrated = hydrateNotes(results);
-				res.json(results[0]);
+				res.json(hydrated[0]);
 			} else {
 				next();
 			}
@@ -74,7 +74,7 @@ router.get('/notes/:id', (req, res, next) => {
 // Put update an item
 router.put('/notes/:id', (req, res, next) => {
 	const id = req.params.id;
-	const { tags } = req.body;
+	const { tags = [] } = req.body;
 
 	/***** Never trust users - validate input *****/
 	const updateObj = {};
@@ -99,38 +99,38 @@ router.put('/notes/:id', (req, res, next) => {
 		.update(updateObj, 'id')
 		.where('id', id)
 		.then(([id]) => {
-			if(id){
+			if(id) {
 				noteId = id;
 				return knex('notes_tags')
-						.del()
-						.where('note_id', noteId);
-			} else {
-				next();
+					.del()
+					.where('note_id', noteId);
 			}
+			next();
+
 		})
 		.then(() => {
 			const tagsInsert = tags.map(tagId => ({ note_id: noteId, tag_id: tagId }));
 			return knex('notes_tags')
-						.insert(tagsInsert);
+				.insert(tagsInsert);
 		})
 		.then(() => {
 			return knex('notes')
-			.select('notes.id', 'title', 'content',
-			'folders.id as folder_id', 'folders.name as folderName',
-			'tags.id as tagId', 'tags.name as tagName')
-			.leftJoin('folders', 'notes.folder_id', 'folders.id')
-			.leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
-			.leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
-			.where('notes.id', noteId);
+				.select('notes.id', 'title', 'content',
+					'folders.id as folder_id', 'folders.name as folderName',
+					'tags.id as tagId', 'tags.name as tagName')
+				.leftJoin('folders', 'notes.folder_id', 'folders.id')
+				.leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+				.leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
+				.where('notes.id', noteId);
 		})
 		.then(result => {
 			if (result) {
 			// Hydrate the results
-			const hydrated = hydrateNotes(result)[0];
-			// Respond with a location header, a 201 status and a note object
-			res.location(`${req.originalUrl}/${hydrated.id}`).status(201).json(hydrated);
+				const hydrated = hydrateNotes(result)[0];
+				// Respond with a location header, a 201 status and a note object
+				res.location(`${req.originalUrl}/${hydrated.id}`).status(200).json(hydrated);
 			} else {
-			next();
+				next();
 			}
 		})
 		.catch(err => next(err));
@@ -138,7 +138,7 @@ router.put('/notes/:id', (req, res, next) => {
 
 // Post (insert) an item
 router.post('/notes', (req, res, next) => {
-	const { title, content, folder_id, tags } = req.body;
+	const { title, content, folder_id, tags = [] } = req.body;
 
 	/***** Never trust users - validate input *****/
 	if (!title) {
@@ -166,22 +166,22 @@ router.post('/notes', (req, res, next) => {
 		.then(() => {
 			// Select the new note and leftJoin on folders and tags
 			return knex('notes')
-			.select('notes.id', 'title', 'content',
-			'folders.id as folder_id', 'folders.name as folderName',
-			'tags.id as tagId', 'tags.name as tagName')
-			.leftJoin('folders', 'notes.folder_id', 'folders.id')
-			.leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
-			.leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
-			.where('notes.id', noteId);
+				.select('notes.id', 'title', 'content',
+					'folders.id as folder_id', 'folders.name as folderName',
+					'tags.id as tagId', 'tags.name as tagName')
+				.leftJoin('folders', 'notes.folder_id', 'folders.id')
+				.leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+				.leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
+				.where('notes.id', noteId);
 		})
 		.then(result => {
 			if (result) {
 			// Hydrate the results
-			const hydrated = hydrateNotes(result)[0];
-			// Respond with a location header, a 201 status and a note object
-			res.location(`${req.originalUrl}/${hydrated.id}`).status(201).json(hydrated);
+				const hydrated = hydrateNotes(result)[0];
+				// Respond with a location header, a 201 status and a note object
+				res.location(`${req.originalUrl}/${hydrated.id}`).status(201).json(hydrated);
 			} else {
-			next();
+				next();
 			}
 		})
 		.catch(err => next(err));
